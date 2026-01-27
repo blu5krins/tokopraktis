@@ -14,7 +14,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check setup status via cookie
+  // SERVERLESS MODE: Skip setup checks if DATABASE_URL exists (Vercel/production)
+  // In serverless, file system is ephemeral, so we rely on DATABASE_URL
+  if (process.env.DATABASE_URL || (process.env.NODE_ENV === 'production' && process.env.DATABASE_HOST)) {
+    console.log('Serverless mode detected - skipping setup checks');
+    return NextResponse.next();
+  }
+
+  // Check setup status via cookie (only for local/persistent environments)
   const setupComplete = request.cookies.get('setup-complete');
   const isSetup = setupComplete?.value === 'true';
   

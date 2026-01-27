@@ -66,7 +66,8 @@ A complete web-based Point of Sale application built with Next.js 16 and MySQL. 
 
 - **`main`** - MySQL version with web installer (for VPS/Railway/Render)
 - **`vercel-serverless`** - MySQL + PlanetScale (serverless Vercel deployment)
-- **`supabase-postgres`** - PostgreSQL + Supabase/Neon (free tier available)
+- **`supabase-postgres`** - PostgreSQL + Supabase (with web installer for VPS/Railway)
+- **`supabase-postgres-serverless`** - PostgreSQL + Supabase (serverless for Vercel) ⭐
 
 ## 📁 Project Structure
 
@@ -154,12 +155,13 @@ NODE_ENV=development
 
 ### Quick Comparison:
 
-| Platform | Branch | Database | Free Tier | Setup |
-|----------|--------|----------|-----------|-------|
-| **Supabase** | `supabase-postgres` | PostgreSQL | ✅ 500MB | ⭐ Easy |
-| **Railway** | `main` | MySQL | ✅ $5/mo | ⭐⭐ Medium |
-| **Vercel + PlanetScale** | `vercel-serverless` | MySQL | ❌ $39/mo | ⭐⭐⭐ Hard |
-| **VPS** | `main` | MySQL | ❌ Paid | ⭐⭐⭐ Hard |
+| Platform | Branch | Database | Free Tier | Setup | Web Installer |
+|----------|--------|----------|-----------|-------|---------------|
+| **Supabase + Vercel** | `supabase-postgres-serverless` | PostgreSQL | ✅ 500MB | ⭐ Easy | ❌ Manual |
+| **Supabase + Railway** | `supabase-postgres` | PostgreSQL | ✅ 500MB | ⭐⭐ Medium | ✅ Yes |
+| **Railway** | `main` | MySQL | ✅ $5/mo | ⭐⭐ Medium | ✅ Yes |
+| **Vercel + PlanetScale** | `vercel-serverless` | MySQL | ❌ $39/mo | ⭐⭐⭐ Hard | ❌ Manual |
+| **VPS** | `main` | MySQL | ❌ Paid | ⭐⭐⭐ Hard | ✅ Yes |
 
 ### Deployment Guides:
 
