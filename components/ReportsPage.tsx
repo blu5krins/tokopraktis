@@ -1,15 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, TrendingUp, ShoppingBag, ChevronDown, ChevronUp, FileText, FileDown } from 'lucide-react';
+import { Calendar, TrendingUp, ShoppingBag, ChevronDown, ChevronUp, FileText, FileDown, RotateCcw } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import Swal from 'sweetalert2';
 
 interface Transaction {
   id: number;
   customer_name: string;
-  total: number;
-  payment: number;
-  change: number;
+  total_amount: number;
+  payment_amount: number;
+  change_amount: number;
   created_at: string;
   items: TransactionItem[];
   is_debt: boolean;
@@ -37,9 +38,9 @@ export default function ReportsPage() {
       // Ensure numeric values are properly converted
       const formattedData = data.map((t: any) => ({
         ...t,
-        total: Number(t.total) || 0,
-        payment: Number(t.payment) || 0,
-        change: Number(t.change_amount) || 0,
+        total_amount: Number(t.total_amount) || 0,
+        payment_amount: Number(t.payment_amount) || 0,
+        change_amount: Number(t.change_amount) || 0,
         items: t.items || [],
         is_debt: t.is_debt || false
       }));
@@ -58,6 +59,58 @@ export default function ReportsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleRevokeTransaction = async (transactionId: number, customerName: string) => {
+    const result = await Swal.fire({
+      title: 'Retur Transaksi?',
+      html: `
+        <div class="text-left">
+          <p class="mb-2">Transaksi pelanggan <strong>${customerName}</strong> akan dibatalkan.</p>
+          <p class="text-red-600 font-semibold mb-2">⚠️ Peringatan:</p>
+          <ul class="text-sm text-slate-600 list-disc pl-5 space-y-1">
+            <li>Transaksi akan dihapus permanen</li>
+            <li>Stok produk akan dikembalikan</li>
+            <li>Data hutang (jika ada) akan dihapus</li>
+            <li>Tindakan ini TIDAK BISA dibatalkan</li>
+          </ul>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Retur Transaksi',
+      cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`/api/transactions/${transactionId}`, {
+          method: 'DELETE'
+        });
+
+        if (res.ok) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Transaksi berhasil diretur dan stok dikembalikan',
+            timer: 2000,
+            showConfirmButton: false
+          });
+          loadTransactions();
+        } else {
+          const error = await res.json();
+          throw new Error(error.error || 'Gagal retur transaksi');
+        }
+      } catch (error: any) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: error.message || 'Terjadi kesalahan saat retur transaksi'
+        });
+      }
+    }
+  };
+
   const filteredTransactions = transactions.filter(t => {
     if (!startDate || !endDate) return true;
     const transDate = new Date(t.created_at).toISOString().split('T')[0];
@@ -69,12 +122,12 @@ export default function ReportsPage() {
   const debtTransactions = filteredTransactions.filter(t => t.is_debt);
 
   // Cash statistics
-  const cashRevenue = cashTransactions.reduce((sum, t) => sum + t.payment, 0);
+  const cashRevenue = cashTransactions.reduce((sum, t) => sum + t.payment_amount, 0);
   const cashCount = cashTransactions.length;
   
   // Debt statistics
-  const debtTotal = debtTransactions.reduce((sum, t) => sum + t.total, 0);
-  const debtPaid = debtTransactions.reduce((sum, t) => sum + t.payment, 0);
+  const debtTotal = debtTransactions.reduce((sum, t) => sum + t.total_amount, 0);
+  const debtPaid = debtTransactions.reduce((sum, t) => sum + t.payment_amount, 0);
   const debtRemaining = debtTotal - debtPaid;
   const debtCount = debtTransactions.length;
 
@@ -94,9 +147,9 @@ export default function ReportsPage() {
       'Tanggal': new Date(t.created_at).toLocaleString('id-ID'),
       'Pelanggan': t.customer_name,
       'Jenis': t.is_debt ? 'HUTANG' : 'TUNAI',
-      'Total': t.total,
-      'Pembayaran': t.payment,
-      'Kembalian': t.change,
+      'Total': t.total_amount,
+      'Pembayaran': t.payment_amount,
+      'Kembalian': t.change_amount,
       'Jumlah Item': Array.isArray(t.items) ? t.items.length : 0
     }));
 
@@ -309,7 +362,7 @@ export default function ReportsPage() {
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <p className="text-lg font-bold text-slate-900">
-                        Rp {transaction.total.toLocaleString('id-ID')}
+                        Rp {transaction.total_amount.toLocaleString('id-ID')}
                       </p>
                       <p className="text-xs text-slate-600">
                         {transaction.items.length} produk
@@ -354,18 +407,29 @@ export default function ReportsPage() {
                   <div className="bg-white rounded-lg p-4 space-y-2 border border-slate-200">
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-600">Subtotal</span>
-                      <span className="font-bold text-slate-900">Rp {transaction.total.toLocaleString('id-ID')}</span>
+                      <span className="font-bold text-slate-900">Rp {transaction.total_amount.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-600">Pembayaran</span>
-                      <span className="font-bold text-slate-900">Rp {transaction.payment.toLocaleString('id-ID')}</span>
+                      <span className="font-bold text-slate-900">Rp {transaction.payment_amount.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="flex justify-between pt-2 border-t border-slate-200">
                       <span className="text-slate-900 font-semibold text-sm">Kembalian</span>
                       <span className="font-bold text-lg text-green-600">
-                        Rp {transaction.change.toLocaleString('id-ID')}
+                        Rp {transaction.change_amount.toLocaleString('id-ID')}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Revoke Button */}
+                  <div className="mt-4">
+                    <button
+                      onClick={() => handleRevokeTransaction(transaction.id, transaction.customer_name)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm"
+                    >
+                      <RotateCcw size={16} />
+                      Retur Transaksi
+                    </button>
                   </div>
                 </div>
               )}
