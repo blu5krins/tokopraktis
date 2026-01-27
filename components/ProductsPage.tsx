@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 interface Product {
   id: number;
   name: string;
-  category: string;
+  category_id: number | null;
   price: number;
   cost_price?: number;
   sell_price?: number;
@@ -35,7 +35,7 @@ export default function ProductsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    category: '',
+    category_id: '',
     cost_price: '',
     sell_price: '',
     price: '',
@@ -79,13 +79,13 @@ export default function ProductsPage() {
     try {
       const productData = {
         name: formData.name,
-        category: formData.category,
+        category_id: formData.category_id ? parseInt(formData.category_id) : null,
         cost_price: parseFloat(formData.cost_price) || 0,
         sell_price: parseFloat(formData.sell_price) || 0,
         price: parseFloat(formData.sell_price || formData.price) || 0,
         stock: parseInt(formData.stock) || 0,
         unit_type: formData.unit_type,
-        has_pieces: formData.has_pieces ? 1 : 0,
+        has_pieces: formData.has_pieces,
         pieces_per_pack: parseInt(formData.pieces_per_pack) || 1,
         price_per_piece: parseFloat(formData.price_per_piece) || 0,
         debt_price: parseFloat(formData.debt_price) || 0,
@@ -143,7 +143,7 @@ export default function ProductsPage() {
     setEditingId(product.id);
     setFormData({
       name: product.name || '',
-      category: product.category || '',
+      category_id: product.category_id ? product.category_id.toString() : '',
       cost_price: product.cost_price ? product.cost_price.toString() : '',
       sell_price: product.sell_price ? product.sell_price.toString() : product.price ? product.price.toString() : '',
       price: product.price ? product.price.toString() : '',
@@ -172,7 +172,7 @@ export default function ProductsPage() {
   const resetForm = () => {
     setFormData({ 
       name: '', 
-      category: '', 
+      category_id: '', 
       cost_price: '', 
       sell_price: '', 
       price: '', 
@@ -357,7 +357,7 @@ export default function ProductsPage() {
           setEditingId(null);
           setFormData({
             name: '',
-            category: '',
+            category_id: '',
             cost_price: '',
             sell_price: '',
             price: '',
@@ -552,13 +552,13 @@ export default function ProductsPage() {
                 </label>
                 <select
                   required
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  value={formData.category_id}
+                  onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
                   <option value="">Pilih kategori</option>
                   {categories.map(c => (
-                    <option key={c.id} value={c.name}>{c.name}</option>
+                    <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
               </div>
