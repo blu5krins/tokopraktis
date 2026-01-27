@@ -317,6 +317,9 @@ export default function StockManagementPage() {
                     className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   />
+                  <p className="text-xs text-slate-500 mt-1">
+                    💡 Untuk produk dengan satuan pcs, input dalam jumlah pcs (misal: 24 pcs untuk 2 pack × 12)
+                  </p>
                 </div>
 
                 <div>

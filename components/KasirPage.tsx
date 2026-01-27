@@ -254,14 +254,16 @@ export default function KasirPage() {
 
       const transactionData = {
         items: cart.map(item => {
-          const unitLabel = item.selectedUnit === 'piece' ? 'btg' : (item.unit_type || 'pcs');
+          const unitLabel = item.selectedUnit === 'piece' ? 'pcs' : (item.unit_type || 'pcs');
           return {
             id: item.id,
             name: `${item.name} (${unitLabel})`,
             quantity: item.quantity,
             price: item.unitPrice,
             subtotal: item.unitPrice * item.quantity,
-            selectedUnit: item.selectedUnit
+            selectedUnit: item.selectedUnit,
+            pieces_per_pack: item.pieces_per_pack || 1,
+            has_pieces: item.has_pieces || false
           };
         }),
         total,
@@ -313,14 +315,16 @@ export default function KasirPage() {
 
       const transactionData = {
         items: cart.map(item => {
-          const unitLabel = item.selectedUnit === 'piece' ? 'btg' : (item.unit_type || 'pcs');
+          const unitLabel = item.selectedUnit === 'piece' ? 'pcs' : (item.unit_type || 'pcs');
           return {
             id: item.id,
             name: `${item.name} (${unitLabel})`,
             quantity: item.quantity,
             price: item.unitPrice,
             subtotal: item.unitPrice * item.quantity,
-            selectedUnit: item.selectedUnit
+            selectedUnit: item.selectedUnit,
+            pieces_per_pack: item.pieces_per_pack || 1,
+            has_pieces: item.has_pieces || false
           };
         }),
         total,

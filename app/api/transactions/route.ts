@@ -31,9 +31,17 @@ export async function POST(request: Request) {
         [transactionId, item.id, item.name, item.quantity, item.price, item.subtotal]
       );
       
+      // Calculate stock deduction in pieces (smallest unit)
+      let stockDeduction = item.quantity;
+      if (item.has_pieces && item.selectedUnit === 'pack') {
+        // If selling by pack, multiply by pieces_per_pack
+        stockDeduction = item.quantity * (item.pieces_per_pack || 1);
+      }
+      // If selling by piece, quantity is already in pieces
+      
       await connection.query(
         'UPDATE products SET stock = stock - $1 WHERE id = $2',
-        [item.quantity, item.id]
+        [stockDeduction, item.id]
       );
     }
     

@@ -283,12 +283,30 @@ export default function ProductsPage() {
                   <h3 className="font-semibold text-sm text-slate-900 truncate">{product.name}</h3>
                   <p className="text-xs text-slate-500">{getCategoryName(product.category_name)}</p>
                 </div>
-                <span className={`px-2 py-1 rounded-md text-xs font-bold flex-shrink-0 ${
-                  product.stock > 10 ? 'bg-green-100 text-green-700' : 
-                  product.stock > 0 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
-                }`}>
-                  {product.stock}
-                </span>
+                <div className="flex flex-col items-end flex-shrink-0">
+                  {product.has_pieces && product.pieces_per_pack ? (
+                    <>
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${
+                        product.stock > 10 ? 'bg-green-100 text-green-700' : 
+                        product.stock > 0 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        {Math.floor(product.stock / product.pieces_per_pack)} pack
+                      </span>
+                      {product.stock % product.pieces_per_pack > 0 && (
+                        <span className="text-[10px] text-slate-500 mt-0.5">
+                          + {product.stock % product.pieces_per_pack} pcs
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className={`px-2 py-1 rounded-md text-xs font-bold ${
+                      product.stock > 10 ? 'bg-green-100 text-green-700' : 
+                      product.stock > 0 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {product.stock}
+                    </span>
+                  )}
+                </div>
               </div>
               
               {/* Price Row */}
