@@ -456,7 +456,7 @@ export default function KasirPage() {
             className="bg-white rounded-xl p-3 hover:shadow-lg transition-all duration-200 border border-slate-200 hover:border-indigo-300 group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <h3 className="font-semibold text-xs text-slate-900 mb-1 text-center leading-tight min-h-[2rem] flex items-center justify-center">{product.name}</h3>
-            <p className="text-xs text-slate-400 mb-1 text-center">{product.category}</p>
+            <p className="text-xs text-slate-400 mb-1 text-center">{product.category_name || 'Tanpa Kategori'}</p>
             <p className="text-xs font-bold text-indigo-600 text-center mb-1">
               Rp {formatPrice(product.sell_price || product.price)}
             </p>
