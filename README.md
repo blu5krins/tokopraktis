@@ -126,6 +126,76 @@ NODE_ENV=development
 PORT=3000
 ```
 
+## ☁️ Deployment
+
+### Vercel (Serverless)
+
+This branch is optimized for Vercel deployment with PlanetScale MySQL database.
+
+**Prerequisites:**
+1. [PlanetScale](https://planetscale.com) account (free tier available)
+2. [Vercel](https://vercel.com) account
+
+**Steps:**
+
+1. **Create PlanetScale Database**
+   ```bash
+   # Install PlanetScale CLI
+   brew install planetscale/tap/pscale
+   
+   # Login and create database
+   pscale auth login
+   pscale database create tokopraktis
+   pscale branch create tokopraktis main
+   ```
+
+2. **Import Database Schema**
+   ```bash
+   # Connect to database
+   pscale shell tokopraktis main
+   
+   # Then copy and paste content from these files in order:
+   # - migration-00-schema.sql
+   # - migration-01-users.sql
+   # - migration-02-transactions.sql
+   # - migration-payment-method.sql
+   # - migration-settings.sql
+   # - migration-stock-purchases.sql
+   # - migration-unit-pricing.sql
+   ```
+
+3. **Get Connection String**
+   ```bash
+   pscale password create tokopraktis main vercel-password
+   ```
+   Copy the connection string (format: `mysql://...`)
+
+4. **Deploy to Vercel**
+   ```bash
+   # Install Vercel CLI
+   npm i -g vercel
+   
+   # Deploy
+   vercel
+   ```
+
+5. **Configure Environment Variables**
+   In Vercel Dashboard → Settings → Environment Variables:
+   ```
+   DATABASE_URL=mysql://user:password@host/database?ssl={"rejectUnauthorized":true}
+   NODE_ENV=production
+   ```
+
+6. **Access your app**
+   - Login with: `admin` / `admin123`
+   - Change password immediately!
+
+**Note:** The serverless version skips the web installer. Database must be set up manually via PlanetScale.
+
+### Render / Railway / VPS
+
+For persistent file system and local MySQL, use the `main` branch instead. Follow the Quick Start guide above.
+
 ## 📄 License
 
 MIT License - Free for personal and commercial use
