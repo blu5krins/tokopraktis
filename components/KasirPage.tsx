@@ -11,7 +11,8 @@ interface Product {
   cost_price?: number;
   sell_price?: number;
   stock: number;
-  category: string;
+  category_id?: number | null;
+  category_name?: string;
   unit_type?: string;
   has_pieces?: boolean;
   pieces_per_pack?: number;
@@ -391,12 +392,12 @@ export default function KasirPage() {
   };
 
   // Ekstrak kategori unik dari produk
-  const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
+  const categories = ['all', ...new Set(products.map(p => p.category_name).filter(Boolean))];
 
   const filteredProducts = products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.category?.toLowerCase().includes(search.toLowerCase());
-    const matchCategory = selectedCategory === 'all' || p.category === selectedCategory;
+      p.category_name?.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = selectedCategory === 'all' || p.category_name === selectedCategory;
     return matchSearch && matchCategory;
   });
 
