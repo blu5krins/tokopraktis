@@ -11,10 +11,10 @@ const dbConfig = {
 // DELETE - Delete stock purchase
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const connection = await mysql.createConnection(dbConfig);
     
     // Get purchase details before deleting to reverse stock
