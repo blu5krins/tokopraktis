@@ -3,7 +3,14 @@ import { Pool } from 'pg';
 // Support both DATABASE_URL (Supabase/Neon) and individual env vars (local PostgreSQL)
 const pool = new Pool(
   process.env.DATABASE_URL 
-    ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
+    ? { 
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false },
+        // Supabase-specific settings
+        max: 10,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
+      }
     : {
         host: process.env.DATABASE_HOST || 'localhost',
         user: process.env.DATABASE_USER || 'postgres',

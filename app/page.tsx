@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Package, Tag, Users, CreditCard, BarChart3, ChevronDown, Clock, Home as HomeIcon, Settings, LogOut, User, Boxes } from 'lucide-react';
+import { ShoppingCart, Package, Tag, Users, CreditCard, BarChart3, ChevronDown, Clock, Home as HomeIcon, Settings, LogOut, User, Boxes, Ruler } from 'lucide-react';
 import DashboardPage from '@/components/DashboardPage';
 import KasirPage from '@/components/KasirPage';
 import ProductsPage from '@/components/ProductsPage';
@@ -11,10 +11,11 @@ import DebtsPage from '@/components/DebtsPage';
 import ReportsPage from '@/components/ReportsPage';
 import SettingsPage from '@/components/SettingsPage';
 import StockManagementPage from '@/components/StockManagementPage';
+import UnitsPage from '@/components/UnitsPage';
 import LoginPage from '@/components/LoginPage';
 import Swal from 'sweetalert2';
 
-type Page = 'dashboard' | 'kasir' | 'produk' | 'kategori' | 'pelanggan' | 'utang' | 'stok' | 'laporan' | 'pengaturan';
+type Page = 'dashboard' | 'kasir' | 'produk' | 'kategori' | 'satuan' | 'pelanggan' | 'utang' | 'stok' | 'laporan' | 'pengaturan';
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
@@ -108,6 +109,7 @@ export default function Home() {
     { id: 'kasir' as Page, label: 'Kasir', icon: ShoppingCart },
     { id: 'produk' as Page, label: 'Produk', icon: Package },
     { id: 'kategori' as Page, label: 'Kategori', icon: Tag },
+    { id: 'satuan' as Page, label: 'Satuan Unit', icon: Ruler },
     { id: 'pelanggan' as Page, label: 'Pelanggan', icon: Users },
     { id: 'utang' as Page, label: 'Utang', icon: CreditCard },
     { id: 'stok' as Page, label: 'Manajemen Stok', icon: Boxes },
@@ -182,6 +184,7 @@ export default function Home() {
       case 'kasir': return <KasirPage />;
       case 'produk': return <ProductsPage />;
       case 'kategori': return <CategoriesPage />;
+      case 'satuan': return <UnitsPage />;
       case 'pelanggan': return <CustomersPage />;
       case 'utang': return <DebtsPage />;
       case 'stok': return <StockManagementPage />;
