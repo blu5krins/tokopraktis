@@ -8,6 +8,7 @@ interface Product {
   id: number;
   name: string;
   category_id: number | null;
+  category_name?: string;
   price: number;
   cost_price?: number;
   sell_price?: number;
@@ -53,11 +54,9 @@ export default function ProductsPage() {
     loadCategories();
   }, []);
 
-  // Helper function to get category name by ID
-  const getCategoryName = (categoryId: number | null): string => {
-    if (!categoryId) return 'Tanpa Kategori';
-    const category = categories.find(c => c.id === categoryId);
-    return category ? category.name : 'Tanpa Kategori';
+  // Helper function to get category name
+  const getCategoryName = (categoryName: string | undefined): string => {
+    return categoryName || 'Tanpa Kategori';
   };
 
   const loadProducts = async () => {
@@ -199,7 +198,7 @@ export default function ProductsPage() {
   const productCategories = ['all', ...categories.map(c => c.name)];
 
   const filteredProducts = products.filter(p => {
-    const categoryName = getCategoryName(p.category_id);
+    const categoryName = getCategoryName(p.category_name);
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
       categoryName.toLowerCase().includes(search.toLowerCase());
     const matchCategory = selectedCategory === 'all' || categoryName === selectedCategory;
@@ -282,7 +281,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-sm text-slate-900 truncate">{product.name}</h3>
-                  <p className="text-xs text-slate-500">{getCategoryName(product.category_id)}</p>
+                  <p className="text-xs text-slate-500">{getCategoryName(product.category_name)}</p>
                 </div>
                 <span className={`px-2 py-1 rounded-md text-xs font-bold flex-shrink-0 ${
                   product.stock > 10 ? 'bg-green-100 text-green-700' : 
@@ -413,7 +412,7 @@ export default function ProductsPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-slate-900">{viewProduct.name}</h3>
-                  <p className="text-sm text-slate-500">{getCategoryName(viewProduct.category_id)}</p>
+                  <p className="text-sm text-slate-500">{getCategoryName(viewProduct.category_name)}</p>
                 </div>
               </div>
 

@@ -3,7 +3,12 @@ import { query } from '@/lib/db';
 
 export async function GET() {
   try {
-    const [rows]: any = await query('SELECT * FROM products ORDER BY name');
+    const [rows]: any = await query(
+      `SELECT p.*, c.name as category_name 
+       FROM products p 
+       LEFT JOIN categories c ON p.category_id = c.id 
+       ORDER BY p.name`
+    );
     return NextResponse.json(rows);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
