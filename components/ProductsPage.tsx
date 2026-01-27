@@ -26,9 +26,16 @@ interface Category {
   name: string;
 }
 
+interface Unit {
+  id: number;
+  name: string;
+  description?: string;
+}
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showModal, setShowModal] = useState(false);
@@ -52,6 +59,7 @@ export default function ProductsPage() {
   useEffect(() => {
     loadProducts();
     loadCategories();
+    loadUnits();
   }, []);
 
   // Helper function to get category name
@@ -76,6 +84,16 @@ export default function ProductsPage() {
       setCategories(data);
     } catch (error) {
       console.error('Error loading categories:', error);
+    }
+  };
+
+  const loadUnits = async () => {
+    try {
+      const res = await fetch('/api/units');
+      const data = await res.json();
+      setUnits(data);
+    } catch (error) {
+      console.error('Error loading units:', error);
     }
   };
 
@@ -628,14 +646,13 @@ export default function ProductsPage() {
                     onChange={(e) => setFormData({ ...formData, unit_type: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
-                    <option value="pcs">Pcs</option>
-                    <option value="bungkus">Bungkus</option>
-                    <option value="pack">Pack</option>
-                    <option value="box">Box</option>
-                    <option value="kg">Kg</option>
-                    <option value="liter">Liter</option>
-                    <option value="botol">Botol</option>
-                    <option value="sachet">Sachet</option>
+                    {units.length > 0 ? (
+                      units.map(unit => (
+                        <option key={unit.id} value={unit.name}>{unit.name}</option>
+                      ))
+                    ) : (
+                      <option value="pcs">Pcs</option>
+                    )}
                   </select>
                 </div>
 
