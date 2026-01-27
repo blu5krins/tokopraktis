@@ -10,10 +10,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { items, total, payment, change, customer_id, debt_amount } = body;
     
-    // Insert transaction
+    // Generate transaction code
+    const transactionCode = `TRX${Date.now()}`;
+    
+    // Insert transaction with correct column names
     const transactionResult = await connection.query(
-      'INSERT INTO transactions (total, payment, change_amount, customer_id) VALUES ($1, $2, $3, $4) RETURNING id',
-      [total, payment, change, customer_id]
+      'INSERT INTO transactions (transaction_code, total_amount, grand_total, payment_amount, change_amount, customer_id, payment_method, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      [transactionCode, total, total, payment, change, customer_id, 'debt', 1]
     );
     
     const transactionId = transactionResult.rows[0].id;
@@ -25,9 +28,17 @@ export async function POST(request: Request) {
         [transactionId, item.id, item.name, item.quantity, item.price, item.subtotal]
       );
       
+      // Calculate stock deduction in pieces (smallest unit)
+      let stockDeduction = item.quantity;
+      if (item.has_pieces && item.selectedUnit === 'pack') {
+        // If selling by pack, multiply by pieces_per_pack
+        stockDeduction = item.quantity * (item.pieces_per_pack || 1);
+      }
+      // If selling by piece, quantity is already in pieces
+      
       await connection.query(
         'UPDATE products SET stock = stock - $1 WHERE id = $2',
-        [item.quantity, item.id]
+        [stockDeduction, item.id]
       );
     }
     
