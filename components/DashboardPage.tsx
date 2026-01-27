@@ -27,7 +27,7 @@ interface LowStockProduct {
 
 interface RecentTransaction {
   id: number;
-  total: number;
+  total_amount: number;
   customer_id: number;
   created_at: string;
 }
@@ -87,8 +87,8 @@ export default function DashboardPage() {
         return new Date(t.created_at) >= monthStart;
       });
 
-      const todaySales = todayTransactions.reduce((sum: number, t: RecentTransaction) => sum + (Number(t.total) || 0), 0);
-      const monthSales = monthTransactions.reduce((sum: number, t: RecentTransaction) => sum + (Number(t.total) || 0), 0);
+      const todaySales = todayTransactions.reduce((sum: number, t: RecentTransaction) => sum + (Number(t.total_amount) || 0), 0);
+      const monthSales = monthTransactions.reduce((sum: number, t: RecentTransaction) => sum + (Number(t.total_amount) || 0), 0);
       
       const lowStock = products.filter((p: LowStockProduct) => p.stock < 10);
       
@@ -283,7 +283,7 @@ export default function DashboardPage() {
                         <p className="text-xs text-slate-500">{formatDate(transaction.created_at)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-indigo-600">{formatCurrency(transaction.total)}</p>
+                        <p className="font-bold text-indigo-600">{formatCurrency(transaction.total_amount)}</p>
                       </div>
                     </div>
                   ))}
