@@ -38,7 +38,19 @@ export async function DELETE(
       );
     }
     
-    // Delete transaction (cascade will delete transaction_items and debts)
+    // Delete debts first (if any)
+    await connection.query(
+      'DELETE FROM debts WHERE transaction_id = $1',
+      [id]
+    );
+    
+    // Delete transaction_items
+    await connection.query(
+      'DELETE FROM transaction_items WHERE transaction_id = $1',
+      [id]
+    );
+    
+    // Delete transaction
     await connection.query(
       'DELETE FROM transactions WHERE id = $1',
       [id]
