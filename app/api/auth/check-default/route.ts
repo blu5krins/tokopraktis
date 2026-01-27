@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
+import { query } from '@/lib/db';
 
 export async function GET() {
   try {
     // Check if admin password is still default (admin123)
-    const [rows] = await db.query(
-      'SELECT password FROM users WHERE username = ?',
+    const [rows]: any = await query(
+      'SELECT password FROM users WHERE username = $1',
       ['admin']
     );
 

@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
+import pool, { query } from '@/lib/db';
 
 export async function POST(request: Request) {
-  const connection = await pool.getConnection();
+  const connection = await pool.connect();
   
   try {
-    await connection.beginTransaction();
+    await connection.query('BEGIN');
     
     const { customer_id, amount } = await request.json();
     
@@ -14,12 +14,13 @@ export async function POST(request: Request) {
     }
 
     // Get all unpaid debts for this customer, ordered by created date (oldest first)
-    const [debts] = await connection.query(
+    const debtsResult = await connection.query(
       `SELECT * FROM debts 
-       WHERE customer_id = ? AND remaining_amount > 0 
+       WHERE customer_id = $1 AND remaining_amount > 0 
        ORDER BY created_at ASC`,
       [customer_id]
     );
+    const debts = debtsResult.rows;
 
     let remainingPayment = amount;
     
@@ -36,15 +37,15 @@ export async function POST(request: Request) {
       
       await connection.query(
         `UPDATE debts 
-         SET paid_amount = ?, remaining_amount = ?, status = ? 
-         WHERE id = ?`,
+         SET paid_amount = $1, remaining_amount = $2, status = $3 
+         WHERE id = $4`,
         [newPaid, newRemaining, newStatus, debt.id]
       );
       
       remainingPayment -= paymentForThisDebt;
     }
     
-    await connection.commit();
+    await connection.query('COMMIT');
     
     return NextResponse.json({ 
       message: 'Payment successful',
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
       remaining_payment: remainingPayment
     });
   } catch (error) {
-    await connection.rollback();
+    await connection.query('ROLLBACK');
     console.error('Payment error:', error);
     return NextResponse.json({ error: 'Failed to process payment' }, { status: 500 });
   } finally {

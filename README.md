@@ -58,9 +58,15 @@ A complete web-based Point of Sale application built with Next.js 16 and MySQL. 
 ## 🔧 Tech Stack
 
 - **Framework:** Next.js 16.1.3 (App Router + Turbopack)
-- **Database:** MySQL with mysql2/promise
+- **Database:** MySQL or PostgreSQL (multi-branch support)
 - **UI:** Tailwind CSS + Lucide Icons
 - **Notifications:** SweetAlert2
+
+## 📦 Available Branches
+
+- **`main`** - MySQL version with web installer (for VPS/Railway/Render)
+- **`vercel-serverless`** - MySQL + PlanetScale (serverless Vercel deployment)
+- **`supabase-postgres`** - PostgreSQL + Supabase/Neon (free tier available)
 
 ## 📁 Project Structure
 
@@ -107,16 +113,20 @@ To reset and reinstall:
 
 2. Recreate database:
    ```sql
+   -- MySQL (main branch)
    DROP DATABASE pos_warung;
    CREATE DATABASE pos_warung;
+   
+   -- PostgreSQL (supabase-postgres branch)
+   DROP SCHEMA public CASCADE;
+   CREATE SCHEMA public;
    ```
 
 3. Refresh browser and run installer again
 
 ## 📝 Environment Variables
 
-The installer automatically creates `.env.local`. Template available in `.env.example`:
-
+**For MySQL (main / vercel-serverless branches):**
 ```env
 DATABASE_HOST=localhost
 DATABASE_USER=root
@@ -125,6 +135,36 @@ DATABASE_NAME=pos_warung
 NODE_ENV=development
 PORT=3000
 ```
+
+**For PostgreSQL (supabase-postgres branch):**
+```env
+# Option 1: Connection string (Supabase/Neon)
+DATABASE_URL=postgresql://user:password@host:5432/database
+
+# Option 2: Individual variables (local)
+DATABASE_HOST=localhost
+DATABASE_USER=postgres
+DATABASE_PASSWORD=
+DATABASE_NAME=pos_warung
+DATABASE_PORT=5432
+NODE_ENV=development
+```
+
+## ☁️ Deployment
+
+### Quick Comparison:
+
+| Platform | Branch | Database | Free Tier | Setup |
+|----------|--------|----------|-----------|-------|
+| **Supabase** | `supabase-postgres` | PostgreSQL | ✅ 500MB | ⭐ Easy |
+| **Railway** | `main` | MySQL | ✅ $5/mo | ⭐⭐ Medium |
+| **Vercel + PlanetScale** | `vercel-serverless` | MySQL | ❌ $39/mo | ⭐⭐⭐ Hard |
+| **VPS** | `main` | MySQL | ❌ Paid | ⭐⭐⭐ Hard |
+
+### Deployment Guides:
+
+- **Supabase (FREE):** [DEPLOYMENT-SUPABASE.md](DEPLOYMENT-SUPABASE.md)
+- **Railway/Render/VPS:** [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ## 📄 License
 

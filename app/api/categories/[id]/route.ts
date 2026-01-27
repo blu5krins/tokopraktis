@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
+import { query } from '@/lib/db';
 
 export async function GET(
   request: Request,
@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const [rows] = await pool.query('SELECT * FROM categories WHERE id = ?', [id]);
+    const [rows]: any = await query('SELECT * FROM categories WHERE id = $1', [id]);
     const categories = rows as any[];
     
     if (categories.length === 0) {
@@ -29,8 +29,8 @@ export async function PUT(
     const body = await request.json();
     const { name, description } = body;
     
-    await pool.query(
-      'UPDATE categories SET name = ?, description = ? WHERE id = ?',
+    await query(
+      'UPDATE categories SET name = $1, description = $2 WHERE id = $3',
       [name, description, id]
     );
     
@@ -46,7 +46,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    await pool.query('DELETE FROM categories WHERE id = ?', [id]);
+    await query('DELETE FROM categories WHERE id = $1', [id]);
     return NextResponse.json({ message: 'Category deleted successfully' });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete category' }, { status: 500 });

@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
+import pool, { query } from '@/lib/db';
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const connection = await pool.getConnection();
+  const connection = await pool.connect();
   
   try {
-    await connection.beginTransaction();
+    await connection.query('BEGIN');
     
     const { id } = await params;
     const body = await request.json();
@@ -16,27 +16,27 @@ export async function POST(
     
     // Insert payment record
     await connection.query(
-      'INSERT INTO debt_payments (debt_id, amount) VALUES (?, ?)',
+      'INSERT INTO debt_payments (debt_id, amount) VALUES ($1, $2)',
       [id, amount]
     );
     
     // Update debt
     await connection.query(
-      'UPDATE debts SET paid_amount = paid_amount + ?, remaining_amount = remaining_amount - ? WHERE id = ?',
+      'UPDATE debts SET paid_amount = paid_amount + $1, remaining_amount = remaining_amount - $2 WHERE id = $3',
       [amount, amount, id]
     );
     
     // Update status if fully paid
     await connection.query(
-      'UPDATE debts SET status = "paid" WHERE id = ? AND remaining_amount <= 0',
-      [id]
+      'UPDATE debts SET status = $1 WHERE id = $2 AND remaining_amount <= 0',
+      ['paid', id]
     );
     
-    await connection.commit();
+    await connection.query('COMMIT');
     
     return NextResponse.json({ message: 'Payment recorded successfully' });
   } catch (error) {
-    await connection.rollback();
+    await connection.query('ROLLBACK');
     console.error('Payment error:', error);
     return NextResponse.json({ error: 'Failed to process payment' }, { status: 500 });
   } finally {
@@ -50,8 +50,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const [rows] = await pool.query(
-      'SELECT * FROM debt_payments WHERE debt_id = ? ORDER BY payment_date DESC',
+    const [rows]: any = await query(
+      'SELECT * FROM debt_payments WHERE debt_id = $1 ORDER BY payment_date DESC',
       [id]
     );
     return NextResponse.json(rows);

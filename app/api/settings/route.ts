@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/db';
+import pool, { query } from '@/lib/db';
 
 export async function GET() {
   try {
-    const [rows] = await db.query('SELECT * FROM settings');
+    const [rows]: any = await query('SELECT * FROM settings');
     
     const settings: any = {
       bank_name: '',
@@ -37,11 +37,12 @@ export async function POST(request: NextRequest) {
     ];
 
     for (const setting of settings) {
-      await db.query(
+      await query(
         `INSERT INTO settings (setting_key, setting_value) 
-         VALUES (?, ?) 
-         ON DUPLICATE KEY UPDATE setting_value = ?`,
-        [setting.key, setting.value, setting.value]
+         VALUES ($1, $2) 
+         ON CONFLICT (setting_key) 
+         DO UPDATE SET setting_value = $2`,
+        [setting.key, setting.value]
       );
     }
 

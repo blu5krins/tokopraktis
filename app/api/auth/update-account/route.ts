@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/db';
+import { query } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current user data
-    const [rows] = await db.query(
-      'SELECT * FROM users WHERE id = ?',
+    const [rows]: any = await query(
+      'SELECT * FROM users WHERE id = $1',
       [user_id]
     );
 
@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
 
     if (new_username) {
       // Check if username already exists
-      const [existingUsers] = await db.query(
-        'SELECT id FROM users WHERE username = ? AND id != ?',
+      const [existingUsers]: any = await query(
+        'SELECT id FROM users WHERE username = $1 AND id != $2',
         [new_username, user_id]
       );
       
@@ -56,12 +56,12 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      updates.push('username = ?');
+      updates.push(`username = $${updateParams.length + 1}`);
       updateParams.push(new_username);
     }
 
     if (new_password) {
-      updates.push('password = ?');
+      updates.push(`password = $${updateParams.length + 1}`);
       updateParams.push(new_password);
     }
 
@@ -72,10 +72,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    updateQuery += updates.join(', ') + ' WHERE id = ?';
+    updateQuery += updates.join(', ') + ` WHERE id = $${updateParams.length + 1}`;
     updateParams.push(user_id);
 
-    await db.query(updateQuery, updateParams);
+    await query(updateQuery, updateParams);
 
     return NextResponse.json({
       success: true,

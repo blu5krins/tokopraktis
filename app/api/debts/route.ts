@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
+import pool, { query } from '@/lib/db';
 
 export async function GET() {
   try {
-    const [rows] = await pool.query(`
+    const [rows]: any = await query(`
       SELECT d.*, c.name as customer_name, c.phone, d.transaction_id
       FROM debts d
       JOIN customers c ON d.customer_id = c.id
@@ -15,8 +15,8 @@ export async function GET() {
     const debtsWithItems = await Promise.all(
       (rows as any[]).map(async (debt) => {
         if (debt.transaction_id) {
-          const [items] = await pool.query(
-            'SELECT product_name, quantity, price, subtotal FROM transaction_items WHERE transaction_id = ?',
+          const [items]: any = await query(
+            'SELECT product_name, quantity, price, subtotal FROM transaction_items WHERE transaction_id = $1',
             [debt.transaction_id]
           );
           return { ...debt, transaction_items: JSON.stringify(items) };

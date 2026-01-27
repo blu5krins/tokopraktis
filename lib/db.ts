@@ -1,14 +1,28 @@
-import mysql from 'mysql2/promise';
+import { Pool } from 'pg';
 
-// Default configuration - will be replaced by setup installer
-const pool = mysql.createPool({
-  host: process.env.DATABASE_HOST || 'localhost',
-  user: process.env.DATABASE_USER || 'root',
-  password: process.env.DATABASE_PASSWORD || '',
-  database: process.env.DATABASE_NAME || 'pos_warung',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+// Support both DATABASE_URL (Supabase/Neon) and individual env vars (local PostgreSQL)
+const pool = new Pool(
+  process.env.DATABASE_URL 
+    ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
+    : {
+        host: process.env.DATABASE_HOST || 'localhost',
+        user: process.env.DATABASE_USER || 'postgres',
+        password: process.env.DATABASE_PASSWORD || '',
+        database: process.env.DATABASE_NAME || 'pos_warung',
+        port: parseInt(process.env.DATABASE_PORT || '5432'),
+        max: 10,
+      }
+);
+
+// Helper to convert MySQL-style execute to PostgreSQL query
+export async function query(sql: string, params?: any[]) {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(sql, params);
+    return [result.rows, result.fields || []];
+  } finally {
+    client.release();
+  }
+}
 
 export default pool;

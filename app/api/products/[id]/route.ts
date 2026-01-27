@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
+import { query } from '@/lib/db';
 
 export async function GET(
   request: Request,
@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [id]);
+    const [rows]: any = await query('SELECT * FROM products WHERE id = $1', [id]);
     const products = rows as any[];
     
     if (products.length === 0) {
@@ -32,11 +32,11 @@ export async function PUT(
       unit_type, has_pieces, pieces_per_pack, price_per_piece, debt_price, debt_price_per_piece 
     } = body;
     
-    await pool.query(
+    await query(
       `UPDATE products SET 
-        name = ?, price = ?, cost_price = ?, sell_price = ?, stock = ?, category = ?,
-        unit_type = ?, has_pieces = ?, pieces_per_pack = ?, price_per_piece = ?, debt_price = ?, debt_price_per_piece = ?
-      WHERE id = ?`,
+        name = $1, price = $2, cost_price = $3, sell_price = $4, stock = $5, category = $6,
+        unit_type = $7, has_pieces = $8, pieces_per_pack = $9, price_per_piece = $10, debt_price = $11, debt_price_per_piece = $12
+      WHERE id = $13`,
       [
         name, price || sell_price, cost_price || 0, sell_price || price, stock, category,
         unit_type || 'pcs', has_pieces || 0, pieces_per_pack || 1, price_per_piece || 0, debt_price || 0, debt_price_per_piece || 0,
@@ -57,7 +57,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    await pool.query('DELETE FROM products WHERE id = ?', [id]);
+    await query('DELETE FROM products WHERE id = $1', [id]);
     return NextResponse.json({ message: 'Product deleted successfully' });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });

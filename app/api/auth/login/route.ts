@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/db';
+import { query } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user from database
-    const [rows] = await db.query(
-      'SELECT * FROM users WHERE username = ?',
+    const [rows]: any = await query(
+      'SELECT * FROM users WHERE username = $1',
       [username]
     );
 

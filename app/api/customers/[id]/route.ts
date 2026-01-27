@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
+import pool, { query } from '@/lib/db';
 
 export async function GET(
   request: Request,
@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const [rows] = await pool.query('SELECT * FROM customers WHERE id = ?', [id]);
+    const [rows]: any = await query('SELECT * FROM customers WHERE id = $1', [id]);
     const customers = rows as any[];
     
     if (customers.length === 0) {
@@ -29,8 +29,8 @@ export async function PUT(
     const body = await request.json();
     const { name, phone, address } = body;
     
-    await pool.query(
-      'UPDATE customers SET name = ?, phone = ?, address = ? WHERE id = ?',
+    await query(
+      'UPDATE customers SET name = $1, phone = $2, address = $3 WHERE id = $4',
       [name, phone, address, id]
     );
     
@@ -46,7 +46,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    await pool.query('DELETE FROM customers WHERE id = ?', [id]);
+    await query('DELETE FROM customers WHERE id = $1', [id]);
     return NextResponse.json({ message: 'Customer deleted successfully' });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete customer' }, { status: 500 });
