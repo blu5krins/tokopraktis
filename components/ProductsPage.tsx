@@ -591,14 +591,15 @@ export default function ProductsPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-900 mb-2">
-                  Kategori
+                  Kategori <span className="text-red-500">*</span>
                 </label>
                 <select
+                  required
                   value={formData.category_id}
                   onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
-                  <option value="">Pilih kategori</option>
+                  <option value="" disabled>Pilih kategori</option>
                   {categories.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
