@@ -53,6 +53,13 @@ export default function ProductsPage() {
     loadCategories();
   }, []);
 
+  // Helper function to get category name by ID
+  const getCategoryName = (categoryId: number | null): string => {
+    if (!categoryId) return 'Tanpa Kategori';
+    const category = categories.find(c => c.id === categoryId);
+    return category ? category.name : 'Tanpa Kategori';
+  };
+
   const loadProducts = async () => {
     try {
       const res = await fetch('/api/products');
@@ -274,7 +281,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-sm text-slate-900 truncate">{product.name}</h3>
-                  <p className="text-xs text-slate-500">{product.category}</p>
+                  <p className="text-xs text-slate-500">{getCategoryName(product.category_id)}</p>
                 </div>
                 <span className={`px-2 py-1 rounded-md text-xs font-bold flex-shrink-0 ${
                   product.stock > 10 ? 'bg-green-100 text-green-700' : 
@@ -405,7 +412,7 @@ export default function ProductsPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-slate-900">{viewProduct.name}</h3>
-                  <p className="text-sm text-slate-500">{viewProduct.category}</p>
+                  <p className="text-sm text-slate-500">{getCategoryName(viewProduct.category_id)}</p>
                 </div>
               </div>
 
