@@ -8,9 +8,10 @@ export async function GET() {
       SELECT 
         sp.*,
         p.name as product_name,
-        p.category as category_name
+        c.name as category_name
       FROM stock_purchases sp
       LEFT JOIN products p ON sp.product_id = p.id
+      LEFT JOIN categories c ON p.category_id = c.id
       ORDER BY sp.purchase_date DESC, sp.created_at DESC
     `);
     
