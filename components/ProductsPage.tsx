@@ -312,7 +312,7 @@ export default function ProductsPage() {
                 <div className="flex gap-1 flex-wrap">
                   {product.has_pieces && (
                     <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                      {product.pieces_per_pack} btg
+                      {product.pieces_per_pack} pcs
                     </span>
                   )}
                   {product.debt_price && Number(product.debt_price) > 0 && (
@@ -456,13 +456,13 @@ export default function ProductsPage() {
               {/* Pieces Info */}
               {viewProduct.has_pieces && (
                 <div className="bg-purple-50 rounded-lg p-3 mb-4">
-                  <p className="text-xs text-slate-500 mb-2">Penjualan per Batang</p>
+                  <p className="text-xs text-slate-500 mb-2">Penjualan per Pcs</p>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-slate-600">Isi per Pack</span>
-                    <span className="font-bold text-purple-700">{viewProduct.pieces_per_pack} btg</span>
+                    <span className="font-bold text-purple-700">{viewProduct.pieces_per_pack} pcs</span>
                   </div>
                   <div className="flex justify-between items-center mt-1">
-                    <span className="text-sm text-slate-600">Harga per Batang</span>
+                    <span className="text-sm text-slate-600">Harga per Pcs</span>
                     <span className="font-bold text-purple-700">
                       Rp {Number(viewProduct.price_per_piece || 0).toLocaleString('id-ID')}
                     </span>
@@ -482,7 +482,7 @@ export default function ProductsPage() {
                   </div>
                   {viewProduct.has_pieces && viewProduct.debt_price_per_piece && Number(viewProduct.debt_price_per_piece) > 0 && (
                     <div className="flex justify-between items-center mt-1">
-                      <span className="text-sm text-slate-600">Harga Hutang/Batang</span>
+                      <span className="text-sm text-slate-600">Harga Hutang/Pcs</span>
                       <span className="font-bold text-amber-700">
                         Rp {Number(viewProduct.debt_price_per_piece).toLocaleString('id-ID')}
                       </span>
@@ -661,7 +661,7 @@ export default function ProductsPage() {
                     className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   />
                   <span className="text-sm font-medium text-slate-900">
-                    Bisa dijual per satuan kecil (misal: per batang)
+                    Bisa dijual per satuan kecil (misal: per pcs/sachet)
                   </span>
                 </label>
               </div>
@@ -679,7 +679,7 @@ export default function ProductsPage() {
                         type="number"
                         value={formData.pieces_per_pack}
                         onChange={(e) => setFormData({ ...formData, pieces_per_pack: e.target.value })}
-                        placeholder="Misal: 16 batang"
+                        placeholder="Misal: 10 pcs"
                         className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       />
                     </div>
