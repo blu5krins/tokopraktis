@@ -693,8 +693,8 @@ function StockReport({ startDate, endDate }: { startDate: string; endDate: strin
   };
 
   const totalPurchases = stockData.length;
-  const totalQuantity = stockData.reduce((sum, p) => sum + (p.quantity || 0), 0);
-  const totalCost = stockData.reduce((sum, p) => sum + (p.total_cost || 0), 0);
+  const totalQuantity = stockData.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+  const totalCost = stockData.reduce((sum, p) => sum + (Number(p.total_cost) || 0), 0);
 
   return (
     <>
