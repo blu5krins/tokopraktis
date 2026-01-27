@@ -392,7 +392,7 @@ export default function KasirPage() {
   };
 
   // Ekstrak kategori unik dari produk
-  const categories = ['all', ...new Set(products.map(p => p.category_name).filter(Boolean))];
+  const categories: string[] = ['all', ...new Set(products.map(p => p.category_name).filter(Boolean) as string[])];
 
   const filteredProducts = products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
