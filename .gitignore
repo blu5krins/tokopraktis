@@ -29,9 +29,18 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+lerna-debug.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# setup completion marker (DO NOT COMMIT)
+.setup-complete
 
 # vercel
 .vercel
@@ -39,3 +48,57 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database backups
+*.sql.backup
+backup/
+backups/
+*.sqlite
+*.db
+
+# logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Optional npm cache
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# PM2
+.pm2
+ecosystem.config.js
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.backup
+*.bak
+*~
+
+# turbo
+.turbo
