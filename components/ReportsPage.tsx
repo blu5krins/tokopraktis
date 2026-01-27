@@ -52,9 +52,9 @@ export default function ReportsPage() {
 
   useEffect(() => {
     setMounted(true);
-    const today = new Date().toISOString().split('T')[0];
-    setStartDate(today);
-    setEndDate(today);
+    // Default: show all transactions (no date filter)
+    setStartDate('');
+    setEndDate('');
     loadTransactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
