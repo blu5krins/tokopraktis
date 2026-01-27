@@ -196,12 +196,13 @@ export default function ProductsPage() {
   };
 
   // Ekstrak kategori unik dari produk
-  const productCategories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
+  const productCategories = ['all', ...categories.map(c => c.name)];
 
   const filteredProducts = products.filter(p => {
+    const categoryName = getCategoryName(p.category_id);
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.category?.toLowerCase().includes(search.toLowerCase());
-    const matchCategory = selectedCategory === 'all' || p.category === selectedCategory;
+      categoryName.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = selectedCategory === 'all' || categoryName === selectedCategory;
     return matchSearch && matchCategory;
   });
 
