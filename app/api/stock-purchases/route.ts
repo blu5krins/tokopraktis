@@ -46,22 +46,19 @@ export async function POST(request: Request) {
     
     // Update product stock
     await query(
-      'UPDATE products SET stock = stock + $1 WHERE id = $2',
-      [quantity, product_id]
-    );
-    
-    // Update product purchase_price if provided
-    await query(
-      'UPDATE products SET purchase_price = $1 WHERE id = $2',
-      [purchase_price, product_id]
+      'UPDATE products SET stock = stock + $1, cost_price = $2 WHERE id = $3',
+      [quantity, purchase_price, product_id]
     );
     
     return NextResponse.json({ 
       message: 'Stock purchase created successfully',
       id: result[0].id 
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating stock purchase:', error);
-    return NextResponse.json({ error: 'Failed to create stock purchase' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to create stock purchase',
+      details: error.message 
+    }, { status: 500 });
   }
 }
