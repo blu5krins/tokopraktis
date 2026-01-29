@@ -14,6 +14,7 @@ interface Transaction {
   created_at: string;
   items: TransactionItem[];
   is_debt: boolean;
+  payment_method?: string;
 }
 
 interface TransactionItem {
@@ -147,6 +148,7 @@ export default function ReportsPage() {
       'Tanggal': new Date(t.created_at).toLocaleString('id-ID'),
       'Pelanggan': t.customer_name,
       'Jenis': t.is_debt ? 'HUTANG' : 'TUNAI',
+      'Metode Pembayaran': t.is_debt ? '-' : (t.payment_method === 'cash' ? 'Tunai' : t.payment_method === 'transfer' ? 'Transfer Bank' : t.payment_method === 'qris' ? 'QRIS' : 'Tunai'),
       'Total': t.total_amount,
       'Pembayaran': t.payment_amount,
       'Kembalian': t.change_amount,
@@ -356,6 +358,19 @@ export default function ReportsPage() {
                           minute: '2-digit'
                         })}</span>
                       </div>
+                      {!transaction.is_debt && transaction.payment_method && (
+                        <div className="flex items-center gap-1 text-xs mt-1">
+                          {transaction.payment_method === 'cash' && (
+                            <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded font-medium">💵 Tunai</span>
+                          )}
+                          {transaction.payment_method === 'transfer' && (
+                            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">🏦 Transfer</span>
+                          )}
+                          {transaction.payment_method === 'qris' && (
+                            <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded font-medium">📱 QRIS</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -405,6 +420,16 @@ export default function ReportsPage() {
                   </div>
 
                   <div className="bg-white rounded-lg p-4 space-y-2 border border-slate-200">
+                    {!transaction.is_debt && transaction.payment_method && (
+                      <div className="flex justify-between text-sm pb-2 border-b border-slate-200">
+                        <span className="text-slate-600">Metode Pembayaran</span>
+                        <span className="font-bold text-slate-900">
+                          {transaction.payment_method === 'cash' && '💵 Tunai'}
+                          {transaction.payment_method === 'transfer' && '🏦 Transfer Bank'}
+                          {transaction.payment_method === 'qris' && '📱 QRIS'}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-600">Subtotal</span>
                       <span className="font-bold text-slate-900">Rp {transaction.total_amount.toLocaleString('id-ID')}</span>
