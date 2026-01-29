@@ -3,9 +3,10 @@ import { query } from '@/lib/db';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const [rows]: any = await query(
       `SELECT 
         v.*,
@@ -17,7 +18,7 @@ export async function GET(
       LEFT JOIN stock_purchases sp ON v.id = sp.vendor_id
       WHERE v.id = $1
       GROUP BY v.id`,
-      [params.id]
+      [id]
     );
 
     if (!rows || rows.length === 0) {
@@ -33,9 +34,10 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { name, contact_person, phone, email, address, notes } = body;
 
@@ -46,7 +48,7 @@ export async function PUT(
     // Check if another vendor has the same name
     const [existing]: any = await query(
       'SELECT id FROM vendors WHERE LOWER(name) = LOWER($1) AND id != $2',
-      [name.trim(), params.id]
+      [name.trim(), id]
     );
 
     if (existing && existing.length > 0) {
@@ -64,7 +66,7 @@ export async function PUT(
            updated_at = CURRENT_TIMESTAMP
        WHERE id = $7
        RETURNING *`,
-      [name.trim(), contact_person || null, phone || null, email || null, address || null, notes || null, params.id]
+      [name.trim(), contact_person || null, phone || null, email || null, address || null, notes || null, id]
     );
 
     if (!result || result.length === 0) {
@@ -85,13 +87,14 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Check if vendor has any purchases
     const [purchases]: any = await query(
       'SELECT COUNT(*) as count FROM stock_purchases WHERE vendor_id = $1',
-      [params.id]
+      [id]
     );
 
     if (purchases && purchases[0] && Number(purchases[0].count) > 0) {
@@ -102,7 +105,7 @@ export async function DELETE(
 
     const [result]: any = await query(
       'DELETE FROM vendors WHERE id = $1 RETURNING *',
-      [params.id]
+      [id]
     );
 
     if (!result || result.length === 0) {
