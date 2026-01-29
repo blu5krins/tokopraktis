@@ -906,12 +906,12 @@ export default function KasirPage() {
             }
           }}
         >
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-t-2xl">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 sm:p-4 rounded-t-2xl sticky top-0 z-10">
               <div className="flex items-center justify-between">
-                <div className="text-white">
-                  <h2 className="text-lg font-bold">Pilih Satuan Pembelian</h2>
-                  <p className="text-xs opacity-90 mt-0.5">{selectedProduct.name}</p>
+                <div className="text-white flex-1 pr-2">
+                  <h2 className="text-base sm:text-lg font-bold">Pilih Satuan Pembelian</h2>
+                  <p className="text-xs opacity-90 mt-0.5 truncate">{selectedProduct.name}</p>
                 </div>
                 <button
                   onClick={() => {
@@ -925,9 +925,9 @@ export default function KasirPage() {
               </div>
             </div>
 
-            <div className="p-4 space-y-3">
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
-                <p className="text-xs text-purple-700">
+            <div className="p-3 sm:p-4 space-y-3">
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-2.5 sm:p-3 text-center">
+                <p className="text-[11px] sm:text-xs text-purple-700 leading-relaxed">
                   💡 Produk ini dapat dibeli per <strong>{selectedProduct.unit_type || 'bungkus'}</strong> atau per <strong>batang/eceran</strong>
                 </p>
               </div>
@@ -935,20 +935,20 @@ export default function KasirPage() {
               {/* Pack/Bungkus Option */}
               <button
                 onClick={() => addToCartWithUnit(selectedProduct, 'pack')}
-                className="w-full p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 border-2 border-indigo-300 hover:border-indigo-400 rounded-xl transition-all text-left group"
+                className="w-full p-3 sm:p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 border-2 border-indigo-300 hover:border-indigo-400 rounded-xl transition-all text-left group"
               >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-bold text-slate-900 flex items-center gap-2">
-                      📦 Per {selectedProduct.unit_type || 'Bungkus'}
-                      <span className="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-full">Satuan Besar</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                  <div className="flex-1">
+                    <p className="font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+                      <span className="text-sm sm:text-base">📦 Per {selectedProduct.unit_type || 'Bungkus'}</span>
+                      <span className="text-[10px] sm:text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-full whitespace-nowrap">Satuan Besar</span>
                     </p>
-                    <p className="text-xs text-slate-600 mt-1">
+                    <p className="text-[11px] sm:text-xs text-slate-600 mt-1">
                       Isi: {selectedProduct.pieces_per_pack || 1} pcs • Stok: {selectedProduct.stock} {selectedProduct.unit_type || 'pack'}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-indigo-700 text-lg">
+                  <div className="text-left sm:text-right">
+                    <p className="font-bold text-indigo-700 text-base sm:text-lg">
                       Rp {formatPrice(getPrice(selectedProduct, 'pack', isDebtMode))}
                     </p>
                     {isDebtMode && selectedProduct.debt_price && Number(selectedProduct.debt_price) > 0 && (
@@ -961,20 +961,20 @@ export default function KasirPage() {
               {/* Piece/Batang Option */}
               <button
                 onClick={() => addToCartWithUnit(selectedProduct, 'piece')}
-                className="w-full p-4 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-300 hover:border-purple-400 rounded-xl transition-all text-left group"
+                className="w-full p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-300 hover:border-purple-400 rounded-xl transition-all text-left group"
               >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-bold text-slate-900 flex items-center gap-2">
-                      🛒 Per Batang / Eceran
-                      <span className="text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full">Beli Satuan</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                  <div className="flex-1">
+                    <p className="font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+                      <span className="text-sm sm:text-base">🛒 Per Batang / Eceran</span>
+                      <span className="text-[10px] sm:text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full whitespace-nowrap">Beli Satuan</span>
                     </p>
-                    <p className="text-xs text-slate-600 mt-1">
+                    <p className="text-[11px] sm:text-xs text-slate-600 mt-1">
                       Beli eceran • Stok: {selectedProduct.stock * (Number(selectedProduct.pieces_per_pack) || 1)} pcs tersedia
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-purple-700 text-lg">
+                  <div className="text-left sm:text-right">
+                    <p className="font-bold text-purple-700 text-base sm:text-lg">
                       Rp {formatPrice(getPrice(selectedProduct, 'piece', isDebtMode))}
                     </p>
                     {isDebtMode && selectedProduct.debt_price_per_piece && Number(selectedProduct.debt_price_per_piece) > 0 && (
