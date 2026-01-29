@@ -600,8 +600,6 @@ export default function StockManagementPage() {
                       </p>
                     )}
                   </div>
-                    />
-                  </div>
 
                   <div>
                     <label className="block text-sm font-semibold text-slate-900 mb-2">
