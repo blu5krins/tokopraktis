@@ -815,7 +815,7 @@ export default function StockManagementPage() {
                   className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg transition-all group"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3 flex-1" onClick={() => setSelectedVendor(vendor.name)} className="cursor-pointer">
+                    <div className="flex items-center gap-3 flex-1 cursor-pointer" onClick={() => setSelectedVendor(vendor.name)}>
                       <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
                         <Building2 className="text-white" size={24} />
                       </div>
