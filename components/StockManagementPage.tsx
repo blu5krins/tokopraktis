@@ -19,6 +19,8 @@ interface StockPurchase {
   product_name: string;
   category_name: string;
   supplier_name: string;
+  vendor_id?: number;
+  vendor_name?: string;
   quantity: number;
   purchase_price: number;
   total_cost: number;
