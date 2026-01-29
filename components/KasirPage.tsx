@@ -612,17 +612,19 @@ export default function KasirPage() {
         <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40">
           <button
             onClick={() => setShowMobileCart(true)}
-            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl py-4 font-bold shadow-lg flex items-center justify-center gap-3"
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl py-3 px-4 font-bold shadow-lg flex items-center justify-between gap-2"
           >
-            <div className="relative">
-              <ShoppingCart size={22} />
-              <span className="absolute -top-2 -right-2 bg-white text-indigo-600 text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                {cart.reduce((sum, item) => sum + item.quantity, 0)}
-              </span>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <ShoppingCart size={20} />
+                <span className="absolute -top-2 -right-2 bg-white text-indigo-600 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                </span>
+              </div>
+              <span className="text-sm sm:text-base">Keranjang</span>
             </div>
-            <span>Lihat Keranjang</span>
-            <span className="ml-auto bg-white/20 px-3 py-1 rounded-lg text-sm">
-              Rp {total.toLocaleString('id-ID')}
+            <span className="bg-white/20 px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap">
+              Rp {Math.round(total).toLocaleString('id-ID')}
             </span>
           </button>
         </div>
@@ -1004,23 +1006,23 @@ export default function KasirPage() {
             }
           }}
         >
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-t-2xl">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-3 sm:p-4 rounded-t-2xl sticky top-0 z-10">
               <div className="flex items-center justify-between">
-                <div className="text-white">
-                  <h2 className="text-lg font-bold">Metode Pembayaran</h2>
+                <div className="text-white flex-1 pr-2">
+                  <h2 className="text-base sm:text-lg font-bold">Metode Pembayaran</h2>
                   <p className="text-xs opacity-90 mt-0.5">Pilih metode pembayaran</p>
                 </div>
                 <button
                   onClick={() => setShowPaymentModal(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors text-white"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors text-white flex-shrink-0"
                 >
                   <X size={18} />
                 </button>
               </div>
             </div>
 
-            <div className="p-4 space-y-4">
+            <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
               {/* Payment Total */}
               <div className="bg-slate-50 rounded-xl p-4 text-center">
                 <p className="text-sm text-slate-600">Total Pembayaran</p>
@@ -1150,32 +1152,32 @@ export default function KasirPage() {
 
               {/* QRIS Code */}
               {paymentMethod === 'qris' && (
-                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-3">
+                <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 sm:p-4 space-y-2 sm:space-y-3">
                   <div className="flex items-center justify-center gap-2">
-                    <QrCode className="text-purple-600" size={20} />
-                    <h4 className="font-semibold text-purple-900">Scan QRIS</h4>
+                    <QrCode className="text-purple-600" size={18} />
+                    <h4 className="font-semibold text-purple-900 text-sm sm:text-base">Scan QRIS</h4>
                   </div>
                   <div className="flex justify-center">
                     {settings.qris_image ? (
-                      <div className="bg-white p-4 rounded-xl border-2 border-purple-200 shadow-inner">
+                      <div className="bg-white p-3 sm:p-4 rounded-xl border-2 border-purple-200 shadow-inner">
                         <img 
                           src={settings.qris_image} 
                           alt="QRIS Code" 
-                          className="w-48 h-48 object-contain"
+                          className="w-40 h-40 sm:w-48 sm:h-48 object-contain"
                         />
                       </div>
                     ) : (
-                      <div className="bg-white p-4 rounded-xl border-2 border-amber-200 text-center">
-                        <div className="w-48 h-48 flex flex-col items-center justify-center">
-                          <QrCode className="text-amber-500 mb-2" size={48} />
-                          <p className="text-sm text-amber-600 font-medium">QRIS belum diatur</p>
-                          <p className="text-xs text-slate-500 mt-1">Silakan upload di menu Pengaturan</p>
+                      <div className="bg-white p-3 sm:p-4 rounded-xl border-2 border-amber-200 text-center">
+                        <div className="w-40 h-40 sm:w-48 sm:h-48 flex flex-col items-center justify-center">
+                          <QrCode className="text-amber-500 mb-2" size={40} />
+                          <p className="text-xs sm:text-sm text-amber-600 font-medium">QRIS belum diatur</p>
+                          <p className="text-[10px] sm:text-xs text-slate-500 mt-1">Silakan upload di menu Pengaturan</p>
                         </div>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-purple-600 text-center">Scan menggunakan aplikasi e-wallet atau m-banking</p>
-                  <p className="text-sm font-semibold text-purple-900 text-center">Total: Rp {total.toLocaleString('id-ID')}</p>
+                  <p className="text-[10px] sm:text-xs text-purple-600 text-center leading-relaxed">Scan menggunakan aplikasi e-wallet atau m-banking</p>
+                  <p className="text-xs sm:text-sm font-semibold text-purple-900 text-center">Total: Rp {Math.round(total).toLocaleString('id-ID')}</p>
                 </div>
               )}
 
