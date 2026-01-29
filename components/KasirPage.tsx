@@ -114,13 +114,23 @@ export default function KasirPage() {
       return;
     }
 
+    // Debug: Log product info
+    console.log('Product clicked:', {
+      name: product.name,
+      has_pieces: product.has_pieces,
+      pieces_per_pack: product.pieces_per_pack,
+      price_per_piece: product.price_per_piece
+    });
+
     // Jika produk bisa dijual per satuan kecil, tampilkan modal pilihan
     if (product.has_pieces && Number(product.pieces_per_pack) > 1) {
+      console.log('Opening unit selection modal for:', product.name);
       setSelectedProduct(product);
       setShowUnitModal(true);
       return;
     }
 
+    console.log('Adding to cart directly with pack unit');
     // Langsung tambahkan dengan unit default (pack)
     addToCartWithUnit(product, 'pack');
   };
@@ -457,13 +467,33 @@ export default function KasirPage() {
             key={product.id}
             onClick={() => addToCart(product)}
             disabled={product.stock <= 0}
-            className="bg-white rounded-xl p-3 hover:shadow-lg transition-all duration-200 border border-slate-200 hover:border-indigo-300 group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-white rounded-xl p-3 hover:shadow-lg transition-all duration-200 border border-slate-200 hover:border-indigo-300 group disabled:opacity-50 disabled:cursor-not-allowed relative"
           >
+            {/* Badge untuk produk dengan penjualan eceran */}
+            {product.has_pieces && Number(product.pieces_per_pack) > 1 && (
+              <div className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                ECERAN
+              </div>
+            )}
             <h3 className="font-semibold text-xs text-slate-900 mb-1 text-center leading-tight min-h-[2rem] flex items-center justify-center">{product.name}</h3>
             <p className="text-xs text-slate-400 mb-1 text-center">{product.category_name || 'Tanpa Kategori'}</p>
-            <p className="text-xs font-bold text-indigo-600 text-center mb-1">
-              Rp {formatPrice(product.sell_price || product.price)}
-            </p>
+            
+            {/* Tampilkan harga pack dan harga eceran jika ada */}
+            {product.has_pieces && Number(product.pieces_per_pack) > 1 ? (
+              <div className="mb-1">
+                <p className="text-[10px] font-semibold text-indigo-600 text-center">
+                  Rp {formatPrice(product.sell_price || product.price)} / {product.unit_type || 'pack'}
+                </p>
+                <p className="text-[10px] font-semibold text-purple-600 text-center">
+                  Rp {formatPrice(product.price_per_piece || 0)} / ecer
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs font-bold text-indigo-600 text-center mb-1">
+                Rp {formatPrice(product.sell_price || product.price)}
+              </p>
+            )}
+            
             <div className="flex justify-center">
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                 product.stock > 10 ? 'bg-green-100 text-green-700' : 
@@ -868,7 +898,7 @@ export default function KasirPage() {
       {/* Unit Selection Modal */}
       {showUnitModal && selectedProduct && (
         <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowUnitModal(false);
@@ -876,40 +906,49 @@ export default function KasirPage() {
             }
           }}
         >
-          <div className="bg-white rounded-xl max-w-sm w-full shadow-xl">
-            <div className="border-b border-slate-200 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-t-2xl">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-900">Pilih Satuan</h2>
+                <div className="text-white">
+                  <h2 className="text-lg font-bold">Pilih Satuan Pembelian</h2>
+                  <p className="text-xs opacity-90 mt-0.5">{selectedProduct.name}</p>
+                </div>
                 <button
                   onClick={() => {
                     setShowUnitModal(false);
                     setSelectedProduct(null);
                   }}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors text-white"
                 >
                   <X size={20} />
                 </button>
               </div>
-              <p className="text-sm text-slate-600 mt-1">{selectedProduct.name}</p>
             </div>
 
             <div className="p-4 space-y-3">
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                <p className="text-xs text-purple-700">
+                  💡 Produk ini dapat dibeli per <strong>{selectedProduct.unit_type || 'bungkus'}</strong> atau per <strong>batang/eceran</strong>
+                </p>
+              </div>
+
               {/* Pack/Bungkus Option */}
               <button
                 onClick={() => addToCartWithUnit(selectedProduct, 'pack')}
-                className="w-full p-4 bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-300 rounded-xl transition-all text-left"
+                className="w-full p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 border-2 border-indigo-300 hover:border-indigo-400 rounded-xl transition-all text-left group"
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-bold text-slate-900">
-                      Per {selectedProduct.unit_type || 'Bungkus'}
+                    <p className="font-bold text-slate-900 flex items-center gap-2">
+                      📦 Per {selectedProduct.unit_type || 'Bungkus'}
+                      <span className="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-full">Satuan Besar</span>
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Isi {selectedProduct.pieces_per_pack || 1} satuan
+                    <p className="text-xs text-slate-600 mt-1">
+                      Isi: {selectedProduct.pieces_per_pack || 1} pcs • Stok: {selectedProduct.stock} {selectedProduct.unit_type || 'pack'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-indigo-600">
+                    <p className="font-bold text-indigo-700 text-lg">
                       Rp {formatPrice(getPrice(selectedProduct, 'pack', isDebtMode))}
                     </p>
                     {isDebtMode && selectedProduct.debt_price && Number(selectedProduct.debt_price) > 0 && (
@@ -922,15 +961,20 @@ export default function KasirPage() {
               {/* Piece/Batang Option */}
               <button
                 onClick={() => addToCartWithUnit(selectedProduct, 'piece')}
-                className="w-full p-4 bg-slate-50 hover:bg-purple-50 border-2 border-slate-200 hover:border-purple-300 rounded-xl transition-all text-left"
+                className="w-full p-4 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-300 hover:border-purple-400 rounded-xl transition-all text-left group"
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-bold text-slate-900">Per Batang / Satuan</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Beli eceran</p>
+                    <p className="font-bold text-slate-900 flex items-center gap-2">
+                      🛒 Per Batang / Eceran
+                      <span className="text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full">Beli Satuan</span>
+                    </p>
+                    <p className="text-xs text-slate-600 mt-1">
+                      Beli eceran • Stok: {selectedProduct.stock * (Number(selectedProduct.pieces_per_pack) || 1)} pcs tersedia
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-purple-600">
+                    <p className="font-bold text-purple-700 text-lg">
                       Rp {formatPrice(getPrice(selectedProduct, 'piece', isDebtMode))}
                     </p>
                     {isDebtMode && selectedProduct.debt_price_per_piece && Number(selectedProduct.debt_price_per_piece) > 0 && (
@@ -941,7 +985,7 @@ export default function KasirPage() {
               </button>
 
               {isDebtMode && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-center">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
                   <p className="text-xs text-amber-700">⚠️ Mode Hutang Aktif - Harga menyesuaikan</p>
                 </div>
               )}
