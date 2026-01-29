@@ -35,7 +35,7 @@ interface Customer {
 
 // Format harga dengan format Indonesia (titik sebagai pemisah ribuan)
 const formatPrice = (price: number) => {
-  return price.toLocaleString('id-ID');
+  return Math.round(price).toLocaleString('id-ID');
 };
 
 export default function KasirPage() {
