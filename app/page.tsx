@@ -205,7 +205,7 @@ export default function Home() {
               <ShoppingCart className="text-white" size={20} />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-900">POS System</h1>
+              <h1 className="text-lg font-bold text-slate-900">TokoPraktis</h1>
               <p className="text-xs text-slate-500">Point of Sale</p>
             </div>
           </div>
@@ -274,7 +274,7 @@ export default function Home() {
               <ShoppingCart className="text-white" size={18} />
             </div>
             <div>
-              <h1 className="text-base font-bold text-slate-900">POS System</h1>
+              <h1 className="text-base font-bold text-slate-900">TokoPraktis</h1>
             </div>
           </div>
 

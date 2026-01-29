@@ -100,7 +100,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg mb-4">
               <ShoppingCart className="text-white" size={40} />
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">POS System</h1>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">TokoPraktis</h1>
             <p className="text-sm text-slate-600">Masuk ke akun Anda</p>
           </div>
 
@@ -181,7 +181,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
         {/* Footer */}
         <p className="text-center text-white text-sm mt-6 drop-shadow-lg">
-          © 2026 POS System. All rights reserved.
+          © 2026 TokoPraktis. All rights reserved.
         </p>
       </div>
     </div>
