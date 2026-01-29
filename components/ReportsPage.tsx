@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, TrendingUp, ShoppingBag, ChevronDown, ChevronUp, FileText, FileDown, RotateCcw } from 'lucide-react';
+import { Calendar, TrendingUp, ShoppingBag, ChevronDown, ChevronUp, FileText, FileDown, RotateCcw, Banknote, Building2, QrCode } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
 
@@ -361,13 +361,19 @@ export default function ReportsPage() {
                       {!transaction.is_debt && transaction.payment_method && (
                         <div className="flex items-center gap-1 text-xs mt-1">
                           {transaction.payment_method === 'cash' && (
-                            <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded font-medium">💵 Tunai</span>
+                            <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+                              <Banknote size={12} /> Tunai
+                            </span>
                           )}
                           {transaction.payment_method === 'transfer' && (
-                            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">🏦 Transfer</span>
+                            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+                              <Building2 size={12} /> Transfer
+                            </span>
                           )}
                           {transaction.payment_method === 'qris' && (
-                            <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded font-medium">📱 QRIS</span>
+                            <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+                              <QrCode size={12} /> QRIS
+                            </span>
                           )}
                         </div>
                       )}
@@ -423,10 +429,10 @@ export default function ReportsPage() {
                     {!transaction.is_debt && transaction.payment_method && (
                       <div className="flex justify-between text-sm pb-2 border-b border-slate-200">
                         <span className="text-slate-600">Metode Pembayaran</span>
-                        <span className="font-bold text-slate-900">
-                          {transaction.payment_method === 'cash' && '💵 Tunai'}
-                          {transaction.payment_method === 'transfer' && '🏦 Transfer Bank'}
-                          {transaction.payment_method === 'qris' && '📱 QRIS'}
+                        <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                          {transaction.payment_method === 'cash' && <><Banknote size={14} className="text-green-600" /> Tunai</>}
+                          {transaction.payment_method === 'transfer' && <><Building2 size={14} className="text-blue-600" /> Transfer Bank</>}
+                          {transaction.payment_method === 'qris' && <><QrCode size={14} className="text-purple-600" /> QRIS</>}
                         </span>
                       </div>
                     )}
