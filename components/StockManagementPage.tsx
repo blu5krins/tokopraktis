@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, Plus, Calendar, Trash2, Search, TrendingUp, ShoppingCart, X } from 'lucide-react';
+import { Package, Plus, Calendar, Trash2, Search, TrendingUp, ShoppingCart, X, Users, Building2, FileText } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 interface Product {
@@ -33,15 +33,51 @@ interface PurchaseItem {
   purchase_price: string;
 }
 
+interface VendorSummary {
+  supplier_name: string;
+  total_purchases: number;
+  total_quantity: number;
+  total_cost: number;
+  last_purchase_date: string;
+}
+
+interface Vendor {
+  id: number;
+  name: string;
+  contact_person?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+  total_purchases: number;
+  total_quantity: number;
+  total_cost: number;
+  last_purchase_date?: string;
+}
+
 export default function StockManagementPage() {
+  const [activeTab, setActiveTab] = useState<'purchases' | 'vendors'>('purchases');
   const [purchases, setPurchases] = useState<StockPurchase[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [showVendorForm, setShowVendorForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
+  const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
   const [formData, setFormData] = useState({
+    vendor_id: '',
     supplier_name: '',
     notes: '',
     purchase_date: new Date().toISOString().split('T')[0]
+  });
+  const [vendorFormData, setVendorFormData] = useState({
+    name: '',
+    contact_person: '',
+    phone: '',
+    email: '',
+    address: '',
+    notes: ''
   });
   const [items, setItems] = useState<PurchaseItem[]>([
     { product_id: '', quantity: '', purchase_price: '' }
@@ -50,6 +86,7 @@ export default function StockManagementPage() {
   useEffect(() => {
     loadPurchases();
     loadProducts();
+    loadVendors();
   }, []);
 
   const loadPurchases = async () => {
@@ -74,6 +111,17 @@ export default function StockManagementPage() {
     }
   };
 
+  const loadVendors = async () => {
+    try {
+      const res = await fetch('/api/vendors');
+      const data = await res.json();
+      setVendors(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error loading vendors:', error);
+      setVendors([]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -92,11 +140,11 @@ export default function StockManagementPage() {
       return;
     }
 
-    if (!formData.supplier_name) {
+    if (!formData.vendor_id) {
       Swal.fire({
         icon: 'warning',
         title: 'Data Tidak Lengkap',
-        text: 'Harap isi nama supplier',
+        text: 'Harap pilih vendor',
         timer: 2000
       });
       return;
@@ -110,7 +158,7 @@ export default function StockManagementPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             product_id: parseInt(item.product_id),
-            supplier_name: formData.supplier_name,
+            vendor_id: parseInt(formData.vendor_id),
             quantity: parseInt(item.quantity),
             purchase_price: parseFloat(item.purchase_price),
             notes: formData.notes,
@@ -131,6 +179,7 @@ export default function StockManagementPage() {
         });
         
         setFormData({
+          vendor_id: '',
           supplier_name: '',
           notes: '',
           purchase_date: new Date().toISOString().split('T')[0]
@@ -186,6 +235,118 @@ export default function StockManagementPage() {
     }, 0);
   };
 
+  const handleVendorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!vendorFormData.name.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Data Tidak Lengkap',
+        text: 'Nama vendor wajib diisi',
+        timer: 2000
+      });
+      return;
+    }
+
+    try {
+      const url = editingVendor ? `/api/vendors/${editingVendor.id}` : '/api/vendors';
+      const method = editingVendor ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(vendorFormData)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to save vendor');
+      }
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: editingVendor ? 'Vendor berhasil diupdate' : 'Vendor berhasil ditambahkan',
+        timer: 2000
+      });
+
+      setVendorFormData({
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: ''
+      });
+      setEditingVendor(null);
+      setShowVendorForm(false);
+      loadVendors();
+    } catch (error: any) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: error.message || 'Gagal menyimpan vendor',
+        timer: 2000
+      });
+    }
+  };
+
+  const handleEditVendor = (vendor: Vendor) => {
+    setEditingVendor(vendor);
+    setVendorFormData({
+      name: vendor.name,
+      contact_person: vendor.contact_person || '',
+      phone: vendor.phone || '',
+      email: vendor.email || '',
+      address: vendor.address || '',
+      notes: vendor.notes || ''
+    });
+    setShowVendorForm(true);
+  };
+
+  const handleDeleteVendor = async (vendor: Vendor) => {
+    const result = await Swal.fire({
+      title: 'Hapus Vendor?',
+      text: `Hapus vendor ${vendor.name}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`/api/vendors/${vendor.id}`, {
+          method: 'DELETE'
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to delete vendor');
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Vendor berhasil dihapus',
+          timer: 2000
+        });
+        loadVendors();
+      } catch (error: any) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal!',
+          text: error.message || 'Gagal menghapus vendor',
+          timer: 2000
+        });
+      }
+    }
+  };
+
   const handleDelete = async (id: number, productName: string) => {
     const result = await Swal.fire({
       title: 'Hapus Pembelian?',
@@ -230,8 +391,22 @@ export default function StockManagementPage() {
 
   const filteredPurchases = purchases.filter(p =>
     (p.product_name && p.product_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (p.supplier_name && p.supplier_name.toLowerCase().includes(searchTerm.toLowerCase()))
+    (p.supplier_name && p.supplier_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (p.vendor_name && p.vendor_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  // Filter vendors by search
+  const filteredVendors = vendors.filter(v =>
+    v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (v.contact_person && v.contact_person.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (v.phone && v.phone.includes(searchTerm))
+  );
+
+  // Get purchases for selected vendor
+  const selectedVendorData = vendors.find(v => v.name === selectedVendor);
+  const vendorPurchases = selectedVendor
+    ? purchases.filter(p => p.vendor_name === selectedVendor || p.supplier_name === selectedVendor)
+    : [];
 
   const totalPurchases = purchases.length;
   const totalCost = purchases.reduce((sum, p) => sum + Number(p.total_cost), 0);
@@ -247,18 +422,64 @@ export default function StockManagementPage() {
               <h1 className="text-2xl font-bold text-slate-900">Manajemen Stok</h1>
               <p className="text-sm text-slate-600 mt-1">Kelola pembelian dan stok barang</p>
             </div>
+            {activeTab === 'purchases' && (
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+              >
+                <Plus size={18} />
+                Tambah Pembelian
+              </button>
+            )}
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2 mt-4 border-b border-slate-200">
             <button
-              onClick={() => setShowForm(!showForm)}
-              className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+              onClick={() => {
+                setActiveTab('purchases');
+                setSelectedVendor(null);
+              }}
+              className={`px-4 py-2 font-semibold text-sm transition-all relative ${
+                activeTab === 'purchases'
+                  ? 'text-indigo-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              <Plus size={18} />
-              Tambah Pembelian
+              <div className="flex items-center gap-2">
+                <Package size={18} />
+                <span>Riwayat Pembelian</span>
+              </div>
+              {activeTab === 'purchases' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600"></div>
+              )}
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('vendors')}
+              className={`px-4 py-2 font-semibold text-sm transition-all relative ${
+                activeTab === 'vendors'
+                  ? 'text-indigo-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Users size={18} />
+                <span>Daftar Vendor</span>
+                <span className="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full">
+                  {vendors.length}
+                </span>
+              </div>
+              {activeTab === 'vendors' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600"></div>
+              )}
             </button>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {activeTab === 'purchases' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
@@ -295,9 +516,50 @@ export default function StockManagementPage() {
             </div>
           </div>
         </div>
+        )}
+
+        {activeTab === 'vendors' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                  <Users className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-600 font-medium mb-1">Total Vendor</p>
+                  <p className="text-2xl font-bold text-blue-600">{vendors.length}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+                  <ShoppingCart className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-600 font-medium mb-1">Total Transaksi</p>
+                  <p className="text-2xl font-bold text-purple-600">{totalPurchases}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-600 font-medium mb-1">Total Nilai Pembelian</p>
+                  <p className="text-2xl font-bold text-green-600">Rp {totalCost.toLocaleString('id-ID')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Form */}
-        {showForm && (
+        {showForm && activeTab === 'purchases' && (
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <h2 className="text-lg font-bold text-slate-900 mb-4">Tambah Pembelian Stok</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -307,15 +569,37 @@ export default function StockManagementPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-slate-900 mb-2">
-                      Nama Supplier *
+                      Vendor *
                     </label>
-                    <input
-                      type="text"
-                      value={formData.supplier_name}
-                      onChange={(e) => setFormData({ ...formData, supplier_name: e.target.value })}
-                      placeholder="Contoh: Toko ABC"
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      required
+                    <div className="flex gap-2">
+                      <select
+                        value={formData.vendor_id}
+                        onChange={(e) => setFormData({ ...formData, vendor_id: e.target.value })}
+                        className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        required
+                      >
+                        <option value="">Pilih Vendor</option>
+                        {vendors.map(vendor => (
+                          <option key={vendor.id} value={vendor.id}>
+                            {vendor.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setShowVendorForm(true)}
+                        className="px-3 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600 transition-colors flex items-center gap-1"
+                        title="Tambah Vendor Baru"
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                    {vendors.length === 0 && (
+                      <p className="text-xs text-amber-600 mt-1">
+                        ⚠️ Belum ada vendor. Klik tombol + untuk menambah vendor.
+                      </p>
+                    )}
+                  </div>
                     />
                   </div>
 
@@ -494,14 +778,237 @@ export default function StockManagementPage() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Cari produk atau supplier..."
+              placeholder={activeTab === 'purchases' ? "Cari produk atau supplier..." : "Cari vendor..."}
               className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>
 
+        {/* Vendor List */}
+        {activeTab === 'vendors' && !selectedVendor && (
+          <>
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={() => {
+                  setEditingVendor(null);
+                  setVendorFormData({
+                    name: '',
+                    contact_person: '',
+                    phone: '',
+                    email: '',
+                    address: '',
+                    notes: ''
+                  });
+                  setShowVendorForm(true);
+                }}
+                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+              >
+                <Plus size={18} />
+                Tambah Vendor
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredVendors.map((vendor) => (
+                <div
+                  key={vendor.id}
+                  className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg transition-all group"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3 flex-1" onClick={() => setSelectedVendor(vendor.name)} className="cursor-pointer">
+                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <Building2 className="text-white" size={24} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors">
+                          {vendor.name}
+                        </h3>
+                        <p className="text-xs text-slate-500">Vendor Supplier</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditVendor(vendor);
+                        }}
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit"
+                      >
+                        <FileText size={16} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteVendor(vendor);
+                        }}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Hapus"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {vendor.contact_person && (
+                    <p className="text-xs text-slate-600 mb-1">👤 {vendor.contact_person}</p>
+                  )}
+                  {vendor.phone && (
+                    <p className="text-xs text-slate-600 mb-2">📞 {vendor.phone}</p>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div className="bg-blue-50 rounded-lg p-3 cursor-pointer" onClick={() => setSelectedVendor(vendor.name)}>
+                      <p className="text-xs text-slate-600 mb-1">Total Transaksi</p>
+                      <p className="text-lg font-bold text-blue-600">{vendor.total_purchases || 0}x</p>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-3 cursor-pointer" onClick={() => setSelectedVendor(vendor.name)}>
+                      <p className="text-xs text-slate-600 mb-1">Total Unit</p>
+                      <p className="text-lg font-bold text-purple-600">{vendor.total_quantity || 0}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-slate-200 cursor-pointer" onClick={() => setSelectedVendor(vendor.name)}>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-slate-600">Total Nilai</span>
+                      <span className="text-sm font-bold text-green-600">
+                        Rp {Number(vendor.total_cost || 0).toLocaleString('id-ID')}
+                      </span>
+                    </div>
+                    {vendor.last_purchase_date && (
+                      <div className="flex items-center gap-1 text-xs text-slate-500 mt-2">
+                        <Calendar size={12} />
+                        <span>Terakhir: {new Date(vendor.last_purchase_date).toLocaleDateString('id-ID')}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              
+              {filteredVendors.length === 0 && (
+                <div className="col-span-full text-center py-16 bg-white rounded-xl border border-slate-200">
+                  <Users className="mx-auto text-slate-300 mb-3" size={40} />
+                  <p className="text-sm text-slate-600">
+                    {searchTerm ? 'Vendor tidak ditemukan' : 'Belum ada vendor'}
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Vendor Detail View */}
+        {activeTab === 'vendors' && selectedVendor && (
+          <div className="space-y-4">
+            {/* Vendor Header */}
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <button
+                onClick={() => setSelectedVendor(null)}
+                className="mb-4 text-sm text-indigo-600 hover:text-indigo-700 font-semibold flex items-center gap-1"
+              >
+                ← Kembali ke Daftar Vendor
+              </button>
+              
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Building2 className="text-white" size={32} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">{selectedVendor}</h2>
+                  <p className="text-sm text-slate-600">Riwayat Pembelian Vendor</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <p className="text-xs text-slate-600 mb-1">Total Transaksi</p>
+                  <p className="text-2xl font-bold text-blue-600">{vendorPurchases.length}</p>
+                </div>
+                <div className="bg-purple-50 rounded-lg p-4">
+                  <p className="text-xs text-slate-600 mb-1">Total Unit Dibeli</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {vendorPurchases.reduce((sum, p) => sum + Number(p.quantity), 0)}
+                  </p>
+                </div>
+                <div className="bg-green-50 rounded-lg p-4">
+                  <p className="text-xs text-slate-600 mb-1">Total Nilai Pembelian</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    Rp {vendorPurchases.reduce((sum, p) => sum + Number(p.total_cost), 0).toLocaleString('id-ID')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Vendor Purchases Table */}
+            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-900 uppercase tracking-wider">
+                        Tanggal
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-900 uppercase tracking-wider">
+                        Produk
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-slate-900 uppercase tracking-wider">
+                        Qty
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-900 uppercase tracking-wider">
+                        Harga Beli
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-900 uppercase tracking-wider">
+                        Total Biaya
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {vendorPurchases.map((purchase) => (
+                      <tr key={purchase.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <Calendar size={14} className="text-slate-400" />
+                            <span className="text-sm text-slate-900">
+                              {new Date(purchase.purchase_date).toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div>
+                            <p className="font-semibold text-sm text-slate-900">{purchase.product_name}</p>
+                            {purchase.category_name && (
+                              <p className="text-xs text-slate-500">{purchase.category_name}</p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="font-bold text-slate-900">{purchase.quantity}</span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className="text-sm text-slate-600">
+                            Rp {Number(purchase.purchase_price).toLocaleString('id-ID')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className="font-bold text-green-600">
+                            Rp {Number(purchase.total_cost).toLocaleString('id-ID')}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Purchases List */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        {activeTab === 'purchases' && (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
@@ -589,16 +1096,153 @@ export default function StockManagementPage() {
               </tbody>
             </table>
           </div>
+        )}
 
-          {filteredPurchases.length === 0 && (
+        {filteredPurchases.length === 0 && activeTab === 'purchases' && (
+          <div className="bg-white rounded-xl border border-slate-200">
             <div className="text-center py-16">
               <Package className="mx-auto text-slate-300 mb-3" size={40} />
               <p className="text-sm text-slate-600">
                 {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada pembelian stok'}
               </p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Vendor Form Modal */}
+        {showVendorForm && (
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowVendorForm(false);
+                setEditingVendor(null);
+              }
+            }}
+          >
+            <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="text-white">
+                    <h2 className="text-lg font-bold">{editingVendor ? 'Edit Vendor' : 'Tambah Vendor Baru'}</h2>
+                    <p className="text-xs opacity-90 mt-0.5">Isi informasi vendor</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowVendorForm(false);
+                      setEditingVendor(null);
+                    }}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors text-white"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={handleVendorSubmit} className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">
+                      Nama Vendor *
+                    </label>
+                    <input
+                      type="text"
+                      value={vendorFormData.name}
+                      onChange={(e) => setVendorFormData({ ...vendorFormData, name: e.target.value })}
+                      placeholder="Contoh: PT Maju Jaya"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">
+                      Nama Kontak
+                    </label>
+                    <input
+                      type="text"
+                      value={vendorFormData.contact_person}
+                      onChange={(e) => setVendorFormData({ ...vendorFormData, contact_person: e.target.value })}
+                      placeholder="Nama person in charge"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">
+                      No. Telepon
+                    </label>
+                    <input
+                      type="tel"
+                      value={vendorFormData.phone}
+                      onChange={(e) => setVendorFormData({ ...vendorFormData, phone: e.target.value })}
+                      placeholder="081234567890"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={vendorFormData.email}
+                      onChange={(e) => setVendorFormData({ ...vendorFormData, email: e.target.value })}
+                      placeholder="vendor@email.com"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Alamat
+                  </label>
+                  <textarea
+                    value={vendorFormData.address}
+                    onChange={(e) => setVendorFormData({ ...vendorFormData, address: e.target.value })}
+                    placeholder="Alamat lengkap vendor..."
+                    rows={3}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Catatan
+                  </label>
+                  <textarea
+                    value={vendorFormData.notes}
+                    onChange={(e) => setVendorFormData({ ...vendorFormData, notes: e.target.value })}
+                    placeholder="Catatan tambahan..."
+                    rows={2}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-semibold hover:shadow-lg transition-all"
+                  >
+                    {editingVendor ? 'Update Vendor' : 'Simpan Vendor'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowVendorForm(false);
+                      setEditingVendor(null);
+                    }}
+                    className="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-300 transition-colors"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
