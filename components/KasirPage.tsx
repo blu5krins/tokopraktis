@@ -460,7 +460,7 @@ export default function KasirPage() {
       {/* Main Content - Split Layout */}
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Left Side - Products Grid */}
-        <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-4 md:p-6 shadow-sm">
+        <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-4 md:p-6 shadow-sm lg:max-h-[calc(100vh-220px)] lg:overflow-y-auto">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {filteredProducts.map(product => (
           <button
@@ -518,7 +518,7 @@ export default function KasirPage() {
         </div>
 
         {/* Right Side - Cart Panel (Hidden on Mobile) */}
-        <div className="hidden lg:flex w-full lg:w-96 bg-white rounded-2xl border border-slate-200 shadow-sm flex-col overflow-hidden">
+        <div className="hidden lg:flex w-full lg:w-96 bg-white rounded-2xl border border-slate-200 shadow-sm flex-col overflow-hidden lg:sticky lg:top-4 lg:h-[calc(100vh-120px)]">
           {/* Cart Header */}
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 text-white">
             <div className="flex items-center justify-between mb-3">
