@@ -473,7 +473,18 @@ export default function ProductsPage() {
                 <div className="bg-green-50 rounded-lg p-3">
                   <p className="text-xs text-slate-500 mb-1">Stok</p>
                   <p className="text-lg font-bold text-green-600">
-                    {viewProduct.stock} {viewProduct.unit_type || 'pcs'}
+                    {viewProduct.has_pieces && viewProduct.pieces_per_pack ? (
+                      <>
+                        {Math.floor(viewProduct.stock / viewProduct.pieces_per_pack)} {viewProduct.unit_type || 'Bungkus'}
+                        {viewProduct.stock % viewProduct.pieces_per_pack > 0 && (
+                          <span className="text-sm font-normal text-slate-500">
+                            {' '}+ {viewProduct.stock % viewProduct.pieces_per_pack} pcs
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      `${viewProduct.stock} ${viewProduct.unit_type || 'pcs'}`
+                    )}
                   </p>
                 </div>
                 <div className="bg-purple-50 rounded-lg p-3">
