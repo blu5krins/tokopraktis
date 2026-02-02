@@ -928,29 +928,45 @@ export default function KasirPage() {
             </div>
 
             <div className="p-3 sm:p-4 space-y-3">
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-2.5 sm:p-3 text-center">
-                <p className="text-[11px] sm:text-xs text-purple-700 leading-relaxed">
-                  💡 Produk ini dapat dibeli per <strong>{selectedProduct.unit_type || 'bungkus'}</strong> atau per <strong>batang/eceran</strong>
-                </p>
-              </div>
+              {selectedProduct.stock <= 0 ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 sm:p-3 text-center">
+                  <p className="text-[11px] sm:text-xs text-amber-700 leading-relaxed">
+                    ⚠️ <strong>{selectedProduct.unit_type || 'Bungkus'}</strong> sudah habis. Hanya tersedia <strong>eceran/batang</strong> saja.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-2.5 sm:p-3 text-center">
+                  <p className="text-[11px] sm:text-xs text-purple-700 leading-relaxed">
+                    💡 Produk ini dapat dibeli per <strong>{selectedProduct.unit_type || 'bungkus'}</strong> atau per <strong>batang/eceran</strong>
+                  </p>
+                </div>
+              )}
 
               {/* Pack/Bungkus Option */}
               <button
                 onClick={() => addToCartWithUnit(selectedProduct, 'pack')}
-                className="w-full p-3 sm:p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 border-2 border-indigo-300 hover:border-indigo-400 rounded-xl transition-all text-left group"
+                disabled={selectedProduct.stock <= 0}
+                className={`w-full p-3 sm:p-4 rounded-xl transition-all text-left group ${
+                  selectedProduct.stock <= 0
+                    ? 'bg-gray-100 border-2 border-gray-300 opacity-60 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 border-2 border-indigo-300 hover:border-indigo-400'
+                }`}
               >
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                   <div className="flex-1">
                     <p className="font-bold text-slate-900 flex items-center gap-2 flex-wrap">
                       <span className="text-sm sm:text-base">📦 Per {selectedProduct.unit_type || 'Bungkus'}</span>
                       <span className="text-[10px] sm:text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-full whitespace-nowrap">Satuan Besar</span>
+                      {selectedProduct.stock <= 0 && (
+                        <span className="text-[10px] sm:text-xs bg-red-500 text-white px-2 py-0.5 rounded-full whitespace-nowrap">Stok Habis</span>
+                      )}
                     </p>
                     <p className="text-[11px] sm:text-xs text-slate-600 mt-1">
                       Isi: {selectedProduct.pieces_per_pack || 1} pcs • Stok: {selectedProduct.stock} {selectedProduct.unit_type || 'pack'}
                     </p>
                   </div>
                   <div className="text-left sm:text-right">
-                    <p className="font-bold text-indigo-700 text-base sm:text-lg">
+                    <p className={`font-bold text-base sm:text-lg ${selectedProduct.stock <= 0 ? 'text-gray-500' : 'text-indigo-700'}`}>
                       Rp {formatPrice(getPrice(selectedProduct, 'pack', isDebtMode))}
                     </p>
                     {isDebtMode && selectedProduct.debt_price && Number(selectedProduct.debt_price) > 0 && (
