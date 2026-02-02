@@ -1018,7 +1018,7 @@ export default function KasirPage() {
                       <span className="text-[10px] sm:text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full whitespace-nowrap">Beli Satuan</span>
                     </p>
                     <p className="text-[11px] sm:text-xs text-slate-600 mt-1">
-                      Beli eceran • Stok: {selectedProduct.stock * (Number(selectedProduct.pieces_per_pack) || 1)} pcs tersedia
+                      Beli eceran • Stok: {selectedProduct.stock} pcs tersedia
                     </p>
                   </div>
                   <div className="text-left sm:text-right">
